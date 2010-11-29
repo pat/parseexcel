@@ -1,6 +1,15 @@
-NOTE: the parseexcel developer has retired this codeline in favor of ruby-spreadsheet:
+Note by Pat: The original author has since merged this code into the spreadsheet gem. However, that's released as GPL, so I'm personally going to use this instead. It seems to do the job. Don't blame me for the old documentation though!
 
-http://github.com/jacobat/ruby-spreadsheet/tree/master
+I'm using Bundler, so that makes it easy to refer to this repository instead of the existing gem.
+
+  gem 'parseexcel',
+    :git    => 'git://github.com/freelancing-god/parseexcel.git',
+    :branch => 'master'
+
+I don't maintain the gem, so if you want my changes, you're going to have to grab them from Github.
+
+And below is the original instructions.
+
 
 
 Spreadsheet::ParseExcel - Get information from an Excel file.
