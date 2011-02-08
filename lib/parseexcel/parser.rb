@@ -348,7 +348,7 @@ module Spreadsheet
 								VERSION_BIFF4,
 							].include?(@workbook.biffversion))
 							@workbook.version = @workbook.biffversion
-							@workbook.worksheet(@workbook.sheet_count)
+							@workbook.worksheet(@workbook.worksheets.length)
 							@curr_sheet_idx = 0
 							@current_sheet = @workbook.worksheet(@curr_sheet_idx)
 						end
@@ -677,7 +677,7 @@ module Spreadsheet
 				cell_factory(row, col, params)
 			end
 			def mul_rk(op, len, work) # DK:P349
-				return nil unless (@workbook.sheet_count > 0);
+				return nil unless (@workbook.worksheets.length > 0);
 
 				row, scol = work.unpack('v2')
 				ecol, = work[-2,2].unpack('v')
