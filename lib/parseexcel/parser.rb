@@ -900,7 +900,7 @@ module Spreadsheet
 				elsif(@prev_cond.nil?)
 					@buff << work[1..-1]
 				else
-					cnt1st = work[0] # 1st byte of Continue may be a GR byte
+					cnt1st = work.bytes.first # 1st byte of Continue may be a GR byte
 					stp, lens = @prev_info
 					lenb = @buff.length
 
