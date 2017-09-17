@@ -20,7 +20,7 @@
 #	ywesee - intellectual capital connected, Winterthurerstrasse 52, CH-8006 Zürich, Switzerland
 #	hwyss@ywesee.com
 #
-# Format -- Spreadsheet::ParseExcel -- 10.06.2003 -- hwyss@ywesee.com 
+# Format -- Spreadsheet::ParseExcel -- 10.06.2003 -- hwyss@ywesee.com
 
 module Spreadsheet
 	module ParseExcel
@@ -65,10 +65,8 @@ module Spreadsheet
 				0x31 => "@",
 			}
       begin
-        require 'iconv'
-        iconv = Iconv.new('utf16le', 'latin1')
         @@fmt_strs = @@fmt_strs.inject({}) { |memo, (key, val)|
-          memo.store(key, iconv.iconv(val))
+          memo.store(key, val.encode("UTF-16LE", :invalid => :replace, :undef => :replace, :replace => "?"))
           memo
         }
       rescue
@@ -109,7 +107,7 @@ module Spreadsheet
       def to_s(target_encoding=nil)
         fmt_str = @@fmt_strs[@fmt_idx].to_s
         if(target_encoding)
-          Iconv.new(target_encoding, @encoding).iconv(fmt_str)
+        	fmt_str.encode(target_encoding, :invalid => :replace, :undef => :replace, :replace => "?")
         else
           fmt_str.dup
         end

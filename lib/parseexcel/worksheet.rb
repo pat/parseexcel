@@ -20,10 +20,9 @@
 #	ywesee - intellectual capital connected, Winterthurerstrasse 52, CH-8006 Zürich, Switzerland
 #	hwyss@ywesee.com
 #
-# Worksheet -- Spreadsheet::ParseExcel -- 10.06.2003 -- hwyss@ywesee.com 
+# Worksheet -- Spreadsheet::ParseExcel -- 10.06.2003 -- hwyss@ywesee.com
 
 require 'parseexcel/olestorage'
-require 'iconv'
 
 module Spreadsheet
 	module ParseExcel
@@ -98,11 +97,7 @@ module Spreadsheet
 				end
 				def to_s(target_encoding=nil)
 					if(target_encoding)
-            begin
-						  Iconv.new(target_encoding, @encoding).iconv(@value)
-            rescue
-						  Iconv.new(target_encoding, 'ascii').iconv(@value.to_s)
-            end
+						@value.encode(target_encoding, :invalid => :replace, :undef => :replace, :replace => "?")
 					else
 						@value.to_s
 					end
@@ -110,7 +105,7 @@ module Spreadsheet
 				def font
 				  @book.font(@format.font_no)
 			  end
-				def type 
+				def type
 					@format.cell_type(self) if @format
 				end
 				private
@@ -148,7 +143,7 @@ module Spreadsheet
 			end
       def name(target_encoding=nil)
         if(target_encoding)
-          Iconv.new(target_encoding, 'UTF-16LE').iconv(@name.to_s)
+        	@name.encode(target_encoding, :invalid => :replace, :undef => :replace, :replace => "?")
         else
           @name
         end
