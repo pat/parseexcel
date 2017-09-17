@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# encoding: ASCII-8BIT
 #
 #	Spreadsheet::ParseExcel -- Extract Data from an Excel File
 #	Copyright (C) 2003 ywesee -- intellectual capital connected
@@ -20,7 +21,7 @@
 #	ywesee - intellectual capital connected, Winterthurerstrasse 52, CH-8006 Zürich, Switzerland
 #	hwyss@ywesee.com
 #
-# Parser -- Spreadsheet::ParseExcel -- 10.06.2003 -- hwyss@ywesee.com 
+# Parser -- Spreadsheet::ParseExcel -- 10.06.2003 -- hwyss@ywesee.com
 
 require 'parseexcel/olestorage'
 require 'parseexcel/workbook'
@@ -145,7 +146,7 @@ module Spreadsheet
       }
 			def initialize(params={})
 				#0. Check ENDIAN(Little: Intel etc. BIG: Sparc etc)
-				@bigendian = params.fetch(:bigendian) { 
+				@bigendian = params.fetch(:bigendian) {
 					[2].pack('L').unpack('H8').first != '02000000'
 				}
 				@buff = ''
@@ -157,7 +158,7 @@ module Spreadsheet
 						set_event_handler(key, value)
 					}
 				end
-=begin	
+=begin
 				#Experimental
 				$_CellHandler = $hParam{CellHandler} if($hParam{CellHandler});
 				$_NotSetCell  = $hParam{NotSetCell};
@@ -178,7 +179,7 @@ module Spreadsheet
 
 					#2. Ready for format
 					@workbook.format = (format || Format.new)
-					
+
 					#3. Parse content
 					@global_pos = pos = 0
 					work = biff[pos, 4]
@@ -197,7 +198,7 @@ module Spreadsheet
 						elsif(op == 0x0A) #EOF
 							ef_flag = nil
 						end
-						unless(ef_flag)	
+						unless(ef_flag)
 							#1. Formula String, but not string (0x207)
 							if(!@prev_pos.nil? && @proc_table.include?(op) && op != 0x207)
 								row, col, fmt = @prev_pos
@@ -218,7 +219,7 @@ module Spreadsheet
 							else
 								#puts sprintf("unknown opcode: 0x%03x (%s)", op.to_i, work.inspect[0,30])
 							end
-							(@prev_prc = op) unless(op == CONTINUE) 
+							(@prev_prc = op) unless(op == CONTINUE)
 						end
             @global_pos = pos
 						work = biff[pos, 4] if((pos+4) <= blen)
@@ -241,7 +242,7 @@ module Spreadsheet
 			def set_event_handlers(hash)
 				@proc_table = {}
 				hash.each { |key, value|
-					set_event_handler(key, value)	
+					set_event_handler(key, value)
 				}
 			end
 			private
@@ -318,33 +319,33 @@ module Spreadsheet
 			end
 			def bof(op, len, work) # Developers' Kit : P303
 				version, dtype = work.unpack('v2')
-				
+
 				#Workbook Global
 				if(dtype == 0x5)
 					@workbook.version = version
-					@workbook.biffversion = if(version == VERSION_EXCEL95) 
-						VERSION_BIFF5 
+					@workbook.biffversion = if(version == VERSION_EXCEL95)
+						VERSION_BIFF5
 					else
 						VERSION_BIFF8
 					end
 					@current_sheet = nil
 					@curr_sheet_idx = nil
 					@prev_sheet_idx = -1
-				
+
 				#Worksheet or Dialogsheet
 				elsif(dtype != 0x20)
 					unless(@prev_sheet_idx.nil?)
 						@curr_sheet_idx = @prev_sheet_idx += 1
-						@current_sheet = @workbook.worksheet(@curr_sheet_idx)	
+						@current_sheet = @workbook.worksheet(@curr_sheet_idx)
             @current_sheet.name = @sheet_names[@global_pos]
 						if(work.length > 4)
-							@current_sheet.sheet_version, 
-							@current_sheet.sheet_type, = work.unpack('v2') 
+							@current_sheet.sheet_version,
+							@current_sheet.sheet_type, = work.unpack('v2')
 						end
 					else
 						@workbook.biffversion = (op/0x100).to_i
-						if([VERSION_BIFF2, 
-								VERSION_BIFF3, 
+						if([VERSION_BIFF2,
+								VERSION_BIFF3,
 								VERSION_BIFF4,
 							].include?(@workbook.biffversion))
 							@workbook.version = @workbook.biffversion
@@ -387,7 +388,7 @@ module Spreadsheet
 				format = params[:format] = @workbook.format(fmt)
 				params[:book] = @workbook
 				if(@encoding)
-					params[:encoding] = @encoding 
+					params[:encoding] = @encoding
 				end
 				cell = Worksheet::Cell.new(params)
 				@current_sheet.add_cell(row, col, cell)
@@ -396,7 +397,7 @@ module Spreadsheet
 				codepage, = work.unpack('v')
 				@encoding = CODEPAGES[codepage]
 			end
-			def continue(op, len, work) #DK:P311 
+			def continue(op, len, work) #DK:P311
 				case @prev_prc
 				when SST # previous prc was Shared String Table (:sst)
 					str_wk(work, true)
@@ -432,7 +433,7 @@ module Spreadsheet
 				else
 					str = ''
 					work[pos,chars].each_byte { |byte|
-						str << byte.chr << "\0"
+						str << byte.chr
 					}
 				end
 				[str, uncompressed, pos, len, rcnt, ecnt]
@@ -464,7 +465,7 @@ module Spreadsheet
 			end
 			def conv_dval(val)
 				val = val.unpack('c8').reverse.collect { |bit|
-					bit.to_i	
+					bit.to_i
 				}.pack('c8') if @bigendian
 				val.unpack('d').first
 			end
@@ -506,21 +507,21 @@ module Spreadsheet
 				return unless(@current_sheet)
 				@current_sheet.footer = simple_string(work)
 			end
-			
+
       def swap_for_unicode(x)
         midpoint = ( ( x.size / 2 ).to_i * 2 ) -1
         0.step(midpoint, 2) do |i|
           swapped_element = x[i,1]
           x[i,1] = x[i+1,1]
           x[i+1, 1] = swapped_element
-        end    
+        end
         x
       end
 
       def font(op, len, work)
         superscript = false
         subscript = false
-        case @workbook.biffversion 
+        case @workbook.biffversion
         when VERSION_BIFF8
           height, attribute, color, bold, script, underline = work.unpack('v5c')
           size, high =  work[14,2].unpack('cc')
@@ -530,7 +531,7 @@ module Spreadsheet
             name = name.unpack('n*').pack('U*')
           else
             name = work[16, size ]
-          end    
+          end
           bold      = (bold >= 0x2BC)         ? true : false;
           italic    = (attribute & 0x02 != 0) ? true : false;
           strikeout = (attribute & 0x08 != 0) ? true : false;
@@ -552,37 +553,37 @@ module Spreadsheet
           strikeout = (attribute & 0x04 != 0) ? true : false;
           underline = (attribute & 0x08 != 0) ? true : false;
         end
-        
+
         case script
         when 1
           superscript = true
         when 2
           subscript = true
         end
-        
+
         font = {
           :height      => height / 20.0,
           :color       => color,
           :superscript => superscript,
           :subscript   => subscript,
-          :underline   => underline, 
+          :underline   => underline,
           :name        => name,
           :bold        => bold,
           :italic      => italic,
           :strikeout   => strikeout,
         }
-   
+
         @workbook.add_font(font)
-        
+
         #Font 4 doesn't exist so put in a placeholder
         @workbook.add_font({}) if @workbook.fonts.size == 4
       end
 
 			def format(op, len, work) # DK:P336
 				fmt = if([
-						VERSION_BIFF2, 
-						VERSION_BIFF3, 
-						VERSION_BIFF4, 
+						VERSION_BIFF2,
+						VERSION_BIFF3,
+						VERSION_BIFF4,
 						VERSION_BIFF5,
 					].include?(@workbook.biffversion))
 					work[3, work[2,1].unpack('c').first]
@@ -592,7 +593,7 @@ module Spreadsheet
 				idx = work[0,2].unpack('v').first
 				@workbook.add_text_format(idx, fmt)
 			end
-			
+
 			def formula(op, len, work) # DK:P336
 				row, col, fmt = work.unpack('v3')
 				flag = work[12,2].unpack('v')
@@ -606,7 +607,7 @@ module Spreadsheet
 							:value			=>	txt,
 							:format_no	=>	fmt,
 							:numeric		=>	false,
-							:code				=>	nil, 
+							:code				=>	nil,
 						}
 						cell_factory(row, col, params)
 					else
@@ -619,7 +620,7 @@ module Spreadsheet
 						:value			=>	dval,
 						:format_no	=>	fmt,
 						:numeric		=>	true,
-						:code				=>	nil, 
+						:code				=>	nil,
 					}
 				end
 			end
@@ -658,7 +659,7 @@ module Spreadsheet
 					:value			=>	label,
 					:format_no	=>	fmt,
 					:numeric		=>	false,
-					:code				=>	code, 
+					:code				=>	code,
 				}
 				cell_factory(row, col, params)
 			end
@@ -671,7 +672,7 @@ module Spreadsheet
 					:value			=>	reference.text,
 					:format_no	=>	fmt,
 					:numeric		=>	false,
-					:code				=>	code, 
+					:code				=>	code,
 					:rich				=>	reference.rich
 				}
 				cell_factory(row, col, params)
@@ -730,7 +731,7 @@ module Spreadsheet
 							title_r = []
 							title_c = []
 							area.each { |array|
-								if(array.at(3) == 0xFF) #Row Title	
+								if(array.at(3) == 0xFF) #Row Title
 									title_r.push([array.at(0), array.at(2)])
 								else										#Col Title
 									title_c.push([array.at(1), array.at(3)])
@@ -747,7 +748,7 @@ module Spreadsheet
 							title_r = []
 							title_c = []
 							area.each { |array|
-								if(array.at(3) == 0xFF) #Row Title	
+								if(array.at(3) == 0xFF) #Row Title
 									title_r.push([array.at(0), array.at(2)])
 								else										#Col Title
 									title_c.push([array.at(1), array.at(3)])
@@ -759,7 +760,7 @@ module Spreadsheet
 				end
 			end
 =end
-			def note(op, len, work) 
+			def note(op, len, work)
 				return if(@current_sheet.nil?)
 				ann = Annotation.new
 				row, col, clen = work.unpack('v3')
@@ -770,7 +771,7 @@ module Spreadsheet
 					if(authlen > 0)
 						ann.author = work[11, authlen]
 					end
-					reference = @workbook.annotation(idx - 1) or return 
+					reference = @workbook.annotation(idx - 1) or return
 					ann << reference.text
 				end
 				@current_sheet.cell(row, col).annotation = ann
@@ -795,7 +796,7 @@ module Spreadsheet
 					:value			=>	txt,
 					:format_no	=>	fmt,
 					:numeric		=>	true,
-					:code				=>	nil, 
+					:code				=>	nil,
 				}
 				cell_factory(row, col, params)
 			end
@@ -821,7 +822,7 @@ module Spreadsheet
 					:value			=>	work[8,tln],
 					:format_no	=>	fmt,
 					:numeric		=>	false,
-					:code				=>	:_native_, 
+					:code				=>	:_native_,
 				}
 				#Has STRN
 				if(work.length > (8+tln))
@@ -834,8 +835,8 @@ module Spreadsheet
 				ws.paper, ws.scale, ws.page_start, ws.fit_width, ws.fit_height, \
 				gr_bit, ws.resolution, ws.v_resolution = work.unpack('v8')
 
-				ws.header_margin = conv_dval(work[16,8]) * 127 / 50 
-				ws.footer_margin = conv_dval(work[24,8]) * 127 / 50 
+				ws.header_margin = conv_dval(work[16,8]) * 127 / 50
+				ws.footer_margin = conv_dval(work[24,8]) * 127 / 50
 				ws.copies, = work[32,2].unpack('v') # $oWkS->{Copis}
 				ws.left_to_right = ibool(gr_bit & 0x01)
 				ws.landscape		 = ibool(gr_bit & 0x02)
@@ -887,7 +888,7 @@ module Spreadsheet
 					:value			=>	txt,
 					:format_no	=>	fmt,
 					:numeric		=>	false,
-					:code				=>	code, 
+					:code				=>	code,
 				}
 				cell_factory(row, col, params)
 			end
@@ -983,7 +984,7 @@ module Spreadsheet
 				bdr_cd, fill_p, fill_cf, fill_cb = nil
 
 				if(@workbook.biffversion == VERSION_BIFF8)
-					fnt, idx, gen1, align, gen2, 
+					fnt, idx, gen1, align, gen2,
 					bdr1, bdr2, bdr3, ptn = work.unpack('v7Vv')
 					lock		= ibool(gen1 & 0x01)
 					hidden	= ibool(gen1 & 0x02)
@@ -1028,7 +1029,7 @@ module Spreadsheet
 					hidden	= ibool(gen1 & 0x02)
 					style		= ibool(gen1 & 0x04)
 					i123		= ibool(gen1 & 0x08)
-	
+
 					alh			= (align & 0x07)
 					wrap		= ibool(align & 0x08)
 					alv			= (align & 0x70) / 0x10
@@ -1051,7 +1052,7 @@ module Spreadsheet
 					bdr_cl	= (bdr2 & 0x7F)							& 0x7F
 					bdr_cr	= ((bdr2 & 0x3F80) / 0x80)	& 0x7F
 				end
-				
+
 				params = {
 					:font_no			=>	fnt,
 					#:font					=>	workbook.fonts[fnt],

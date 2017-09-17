@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# encoding: ASCII-8BIT
 #
 #	Spreadsheet::ParseExcel -- Extract Data from an Excel File
 #	Copyright (C) 2003 ywesee -- intellectual capital connected
@@ -20,7 +21,7 @@
 #	ywesee - intellectual capital connected, Winterthurerstrasse 52, CH-8006 Zürich, Switzerland
 #	hwyss@ywesee.com
 #
-# OLEReader -- Spreadsheet::ParseExcel -- 05.06.2003 -- hwyss@ywesee.com 
+# OLEReader -- Spreadsheet::ParseExcel -- 05.06.2003 -- hwyss@ywesee.com
 
 require 'date'
 require 'stringio'
@@ -91,7 +92,7 @@ module OLE
 			end
 		end
 	end
-	class Storage 
+	class Storage
 		PpsType_Root  = 5
 		PpsType_Dir   = 1
 		PpsType_File  = 2
@@ -103,7 +104,7 @@ module OLE
       if(filename.respond_to?(:seek))
         @fh_owner = false
         @fh = filename
-      else 
+      else
         @fh_owner = true
         @fh = File.open(filename, "r")
       end
@@ -121,7 +122,7 @@ module OLE
 				def initialize(no, datastr)
 					@no = no
 					#def init(datastr)
-					nm_size, @type, @prev_pps, 
+					nm_size, @type, @prev_pps,
 					@next_pps, @dir_pps = datastr[0x40,16].unpack('vvVVV')
 					@time_1st = DateTime.parse(datastr[0x64, 8])
 					@time_2nd = DateTime.parse(datastr[0x6C, 8])
@@ -145,7 +146,7 @@ module OLE
 				def get_data(header)
 					@data = if(@size < DataSizeSmall)
 						header.get_small_data(@start_block, @size)
-					else 
+					else
 						header.get_big_data(@start_block, @size)
 					end
 				end
@@ -181,11 +182,11 @@ module OLE
 				#SMALL BLOCK SIZE
 				exp = get_info(0x20, 2, 'v')
 				raise UnknownFormatError.new if exp.nil?
-				@small_block_size = (2 ** exp) 
+				@small_block_size = (2 ** exp)
 				#BDB Count
 				@bdb_count = get_info(0x2C, 4, 'V') or raise UnknownFormatError.new
 				#START BLOCK
-				@root_start = get_info(0x30, 4, 'V') or raise UnknownFormatError.new 
+				@root_start = get_info(0x30, 4, 'V') or raise UnknownFormatError.new
 				#SMALL BD START
 				@sbd_start = get_info(0x3C, 4, 'V') or raise UnknownFormatError.new
 				#SMALL BD COUNT
@@ -272,7 +273,7 @@ module OLE
 			end
 			def get_nth_block_no(start_block, nth)
 				nxt = start_block
-				nth.times { |idx| 
+				nth.times { |idx|
 					nxt = get_next_block_no(nxt)
 					return nil unless Storage.is_normal_block?(nxt)
 				}
@@ -283,10 +284,10 @@ module OLE
 					base_count = @big_block_size / PpsSize
 					pps_block = pos / base_count
 					pps_pos = pos % base_count
-					
-					block = get_nth_block_no(@root_start, pps_block) or return 
+
+					block = get_nth_block_no(@root_start, pps_block) or return
 					set_file_pos(block, PpsSize*pps_pos)
-					buff = @fh.read(PpsSize) or return 
+					buff = @fh.read(PpsSize) or return
 					pps = Storage.pps_factory(pos, buff)
 					pps.get_data(self)
 					@pps_table.store(pos, pps)
@@ -326,10 +327,10 @@ module OLE
 			return [] if(done.include?(no))
 			done.push(no)
 			pps = @header.get_nth_pps(no) or return []
-			cond = if(cse) 
+			cond = if(cse)
 				Proc.new { |name|
 					/^#{Regexp.escape pps.name}$/i.match(name)
-				} 
+				}
 			else
 				Proc.new { |name| name == pps.name }
 			end
@@ -344,7 +345,7 @@ module OLE
 					result += search_pps(names, cse, node, done)
 				end
 			}
-			result	
+			result
 		end
 		private
 		def get_header

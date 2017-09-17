@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# encoding: ASCII-8BIT
 #
 #	Spreadsheet::ParseExcel -- Extract Data from an Excel File
 #	Copyright (C) 2003 ywesee -- intellectual capital connected
